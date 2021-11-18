@@ -87,6 +87,8 @@ if os.path.isdir(os.path.join(validation_path,"affenpinscher")) is False:
 for breed in breed_list:
     for j in glob.glob(os.path.join(training_path,breed_dictionary[breed])):
         shutil.move(j,os.path.join(training_path,breed))
+# I added this comment to test out of github shows updated version
+x = 4
 
 
 
