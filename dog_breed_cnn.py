@@ -84,41 +84,24 @@ if os.path.isdir(os.path.join(validation_path,"affenpinscher")) is False:
 
 
 # attempting to add correct dog breeds to appropriate breed folder in the training folder
-for breed in breed_list:
-    for j in glob.glob(os.path.join(training_path,breed_dictionary[breed])):
-        shutil.move(j,os.path.join(training_path,breed))
-# I added this comment to test out of github shows updated version
-x = 4
-
-
-
-# for breed in breed_list:
-#     for value in breed:
-#         for j in random.sample(glob.glob(os.path.join(training_path, breed_dictionary[value]), 1)):
-#             shutil.move(j, training_path)
-
-
-
-
-
-
-
-
-
+if os.path.isfile(os.path.join(training_path,"boston_bull","000bec180eb18c7604dcecc8fe0dba07")) is False:
+    for breed in breed_list:
+        for j in os.path.join(training_path,breed_dictionary[breed]):
+            shutil.move(j,os.path.join(training_path,breed))
 
 
 training_data = ImageDataGenerator(preprocessing_function=tf.keras.applications.vgg16.preprocess_input).flow_from_directory(
-    directory = training_path,target_size=(224,224), classes=breed_dictionary.keys() #make 1 folder for each breed with name of breed being the folder name
+    directory = training_path,target_size=(224,224), classes=breed_list#make 1 folder for each breed with name of breed being the folder name
 )
 
 # pdb.set_trace()
 
 test_data = ImageDataGenerator(preprocessing_function=tf.keras.applications.vgg16.preprocess_input).flow_from_directory(
-    directory = test_path,target_size=(224,224),classes=breed_dictionary.keys())
+    directory = test_path,target_size=(224,224),classes=breed_list)
 
 
 valid_data = ImageDataGenerator(preprocessing_function=tf.keras.applications.vgg16.preprocess_input).flow_from_directory(
-    directory = validation_path,target_size=(224,224),classes=breed_dictionary.keys()
+    directory = validation_path,target_size=(224,224),classes=breed_list
 )
 
 # Making the vgg16 model and freezing all layers but last 2
