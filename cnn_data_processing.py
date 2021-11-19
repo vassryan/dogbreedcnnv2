@@ -1,3 +1,4 @@
+from keras.engine import training
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
@@ -84,9 +85,8 @@ if os.path.isdir(os.path.join(validation_path,"affenpinscher")) is False:
     for i in range(len(breed_dictionary.keys())):
             os.makedirs(os.path.join(validation_path, breed_list[i]))
 
-
 # attempting to add correct dog breeds to appropriate breed folder in the training folder
-if os.path.isfile(os.path.join(training_path,"boston_bull","000bec180eb18c7604dcecc8fe0dba07")) is False:
+if os.path.isfile(os.path.join(training_path,"boston_bull","000bec180eb18c7604dcecc8fe0dba07.jpg")) is False:
     for breed in breed_list:
-        for j in os.listdir(os.path.join(training_path,breed_dictionary[breed])):
-            shutil.move(j,os.path.join(training_path,breed))
+        for value in breed_dictionary[breed]:
+            shutil.move(os.path.join(training_path, value+".jpg"), os.path.join(training_path,breed))
