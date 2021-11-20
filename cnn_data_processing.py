@@ -1,14 +1,4 @@
-from keras.engine import training
 import numpy as np
-import tensorflow as tf
-from tensorflow import keras
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Activation, Dense, Flatten, BatchNormalization, Conv2D, MaxPool2D
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.metrics import categorical_crossentropy
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
-# from tensorflow.keras.preprocessing.image import image
-from keras.applications.vgg16 import VGG16
 from sklearn.metrics import confusion_matrix
 import itertools
 import os
@@ -20,20 +10,6 @@ import warnings
 import pdb
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
-
-
-# # GPU support
-# physical_devices = tf.config.experimental.list_physical_devices("GPU")
-# print("Num GPUs Available: ", len(physical_devices))
-# tf.config.experimental.set_memory_growth(physical_devices[0], True)
-
-
-# model_test = Sequential({
-#     Conv2D(filters=16, kernel_size=(3,3), padding="same", activation="relu", input=INSERTDOG),
-#     Conv2D(filters=32, kernel_size=(3,3), padding="same",activation="relu")
-#     Conv2D(filters=64, kernel_size=(3,3), padding="same",activation="relu")
-#     Conv2D(filters=128, kernel_size=(3,3), padding="same",activation="relu")
-# })
 
 # Image processing
 
@@ -89,4 +65,42 @@ if os.path.isdir(os.path.join(validation_path,"affenpinscher")) is False:
 if os.path.isfile(os.path.join(training_path,"boston_bull","000bec180eb18c7604dcecc8fe0dba07.jpg")) is False:
     for breed in breed_list:
         for value in breed_dictionary[breed]:
-            shutil.move(os.path.join(training_path, value+".jpg"), os.path.join(training_path,breed))
+            if os.path.isfile(os.path.join(training_path,value+".jpg")):
+                shutil.move(os.path.join(training_path, value+".jpg"), os.path.join(training_path,breed))
+
+
+# moving images into folders for test_subset
+# for validation set, going to make that a subset of the training set, since labels only exist for training set
+# need to be careful not to have duplicate images in validation and training, will likely have to first undo movement of files into folders temporarily
+# and then take like 100-200 images from the training set and move them into validation using random.sample(glob.glob...)
+
+# move images from breed folders back to training path so that can take sample of these images and transfer to validation path
+# if os.path.isfile(os.path.join(training_path,"000bec180eb18c7604dcecc8fe0dba07.jpg")) is False:
+#     for breed in breed_list:
+#         for value in breed_dictionary[breed]:
+#             shutil.move(os.path.join(training_path,breed, value+".jpg"), os.path.join(training_path))
+
+
+# already done, don't need to run again
+# if os.path.isfile(glob.glob(os.path.join(training_path,"*.jpg"))):
+    # for c in random.sample(glob.glob("d:/csc2280/dog_breed_project/dog-breed-identification/train/*.jpg"),100):
+    #     shutil.move(c,validation_path)
+
+# already run so don't need to run again, need to think of if statement that will prevent from rerunning as long as no .jpg in validation folder
+# for breed in breed_list:
+#     for value in breed_dictionary[breed]:
+#         if os.path.isfile(os.path.join(validation_path,value+".jpg")):
+#             shutil.move(os.path.join(validation_path, value+".jpg"), os.path.join(validation_path,breed))
+
+
+
+
+
+
+# confusion matrix
+
+
+
+
+
+# predictions
