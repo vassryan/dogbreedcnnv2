@@ -37,6 +37,8 @@ warnings.simplefilter(action="ignore", category=FutureWarning)
 # Image processing
 
 ROOT="d:/csc2280/dog_breed_project"
+DATAROOT = "dog_breed_project/dog-breed-identification/"
+
 
 training_path = "d:/csc2280/dog_breed_project/dog-breed-identification/train"
 test_path = "d:/csc2280/dog_breed_project/dog-breed-identification/test_subset"   #this actually goes the the test_subset folder, which contains some of the dog pictures from test
@@ -69,28 +71,8 @@ label_dict.close()
 
 breed_list= list(breed_dictionary.keys())
 
-# These three if statements produce folders for each breed of dog in the training, test, and validation directories
-if os.path.isdir(os.path.join(training_path,"affenpinscher")) is False:
-    for i in range(len(breed_dictionary.keys())):
-            os.makedirs(os.path.join(training_path, breed_list[i]))
-
-if os.path.isdir(os.path.join(test_path,"affenpinscher")) is False:
-    for i in range(len(breed_dictionary.keys())):
-            os.makedirs(os.path.join(test_path, breed_list[i]))
-
-if os.path.isdir(os.path.join(validation_path,"affenpinscher")) is False:
-    for i in range(len(breed_dictionary.keys())):
-            os.makedirs(os.path.join(validation_path, breed_list[i]))
-
-
-# attempting to add correct dog breeds to appropriate breed folder in the training folder
-if os.path.isfile(os.path.join(training_path,"boston_bull","000bec180eb18c7604dcecc8fe0dba07")) is False:
-    for breed in breed_list:
-        for j in os.listdir(os.path.join(training_path,breed_dictionary[breed])):
-            shutil.move(j,os.path.join(training_path,breed))
-
-
 # Converting images into data, separating into training, test, and validation sets
+# may need to increase the number of pixels being analyzed for each image if accuracy is not high 
 training_data = ImageDataGenerator(preprocessing_function=tf.keras.applications.vgg16.preprocess_input).flow_from_directory(
     directory = training_path,target_size=(224,224), classes=breed_list#make 1 folder for each breed with name of breed being the folder name
 )
