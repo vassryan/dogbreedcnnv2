@@ -1,12 +1,14 @@
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
+from tensorflow.keras import callbacks
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Activation, Dense, Flatten, BatchNormalization, Conv2D, MaxPool2D
+from tensorflow.keras.layers import Activation, Dense, Flatten, BatchNormalization, Conv2D, MaxPool2D, Dropout
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.metrics import categorical_crossentropy
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-# from tensorflow.keras.preprocessing.image import image
+from tensorflow.keras import regularizers
+from tensorflow.keras.callbacks import ModelCheckpoint
 from keras.applications.vgg16 import VGG16
 from sklearn.metrics import confusion_matrix
 import itertools
@@ -21,7 +23,7 @@ import pdb
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
 
-# # GPU support
+# GPU support
 # physical_devices = tf.config.experimental.list_physical_devices("GPU")
 # print("Num GPUs Available: ", len(physical_devices))
 # tf.config.experimental.set_memory_growth(physical_devices[0], True)
@@ -94,16 +96,25 @@ include_top= False,
 weights="imagenet"
 )
 VGG16_MODEL.trainable=False
+
 pooling_layer = MaxPool2D(pool_size=(2,2),strides=2)
-
-
+wgt_reg_layer = Dense(60,kernel_regularizer=regularizers.l2(0.0001),activation="relu")
+wgt_reg_layer2 = Conv2D(filters=128,kernel_size=(3,3),kernel_regularizer=regularizers.l2(0.0001),activation="relu")
 # 120 because there are 120 dog breeds in list, will have to change if add more breeds
+last_layer = Dense(120,activation="softmax")
 
-last_layer = tf.keras.layers.Dense(120,activation="softmax")
+# first model I tried, overfitting of data, decreasing validation accuracy and increasing training accuracy
+# model = tf.keras.Sequential([
+#     VGG16_MODEL,
+#     pooling_layer,
+#     Flatten(),
+#     last_layer
+# ])
 
 model = tf.keras.Sequential([
     VGG16_MODEL,
-    pooling_layer,
+    wgt_reg_layer,
+ #Might want to investigate BatchNormalization
     Flatten(),
     last_layer
 ])
@@ -111,8 +122,23 @@ model = tf.keras.Sequential([
 model.summary()
 
 model.compile(optimizer=Adam(learning_rate=0.0001), loss="categorical_crossentropy",metrics=['accuracy'])
+checkpoint = ModelCheckpoint(filepath=os.path.join(ROOT,"dog-breed-identification","vgg16_model_saves2"),verbose=2,monitor="accuracy")
+call_back = [checkpoint]
 
-# need a way to link id in training/test sets to the dog breed, might make a dictionary?
+model.fit(x=training_data,batch_size=250,validation_data=valid_data, epochs=50, verbose=2,callbacks=call_back)
 
-model.fit(x=training_data, validation_data=valid_data, epochs=50, verbose=2)
+
+
+# keras.callbacks.ModelCheckpoint
+
+# Might want to add weight regularization and dropout layers to reduce overfitting
+# Data from first 5 epochs of first run (11/22/2021) showed 80% training acc, 34% valid acc
+# Attempted again with BatchNormalization(trainable=False,epsilon=1e-9), but had really low training acc and literally 0% valid acc
+# Attempt 3 involved two Conv2D layers with kernel_regularization, accuracy for training was 9% and valid was 8% after 3 epochs. Could work, but pretty low
+# Attempt 4 used 1 Conv2D layer with regularization, 1% training acc, 4% valid acc after 2 epochs
+# Attempt 5: 1 wgt_reg layer (Dense instead of Conv2D, used l2 weight regularization), 97.55% training acc after 11 epochs, 21% validation acc
+
+
+
+
 
