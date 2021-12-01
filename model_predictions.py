@@ -33,6 +33,7 @@ np.round(predictions)
 
 conf_mat = confusion_matrix(y_true=test_data.classes, y_pred=np.argmax(predictions,axis=-1))
 print(conf_mat)
+
 def plot_confusion_matrix(cm, classes,normalize=False,title="Confusion Matrix", cmap=plt.cm.Blues):
     pass
 
