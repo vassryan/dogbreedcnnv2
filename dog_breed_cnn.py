@@ -10,31 +10,24 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras import regularizers
 from tensorflow.keras.callbacks import ModelCheckpoint
 from keras.applications.vgg16 import VGG16
+from keras.applications.vgg16 import preprocess_input
+from keras.saving import saved_model
 from sklearn.metrics import confusion_matrix
 import itertools
 import os
-import shutil
-import random
-import glob
 import matplotlib.pyplot as plt
 import warnings
 import pdb
+from tensorflow.python.keras.backend import relu
+
+from tensorflow.python.keras.callbacks import EarlyStopping
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
-
 
 # GPU support
 # physical_devices = tf.config.experimental.list_physical_devices("GPU")
 # print("Num GPUs Available: ", len(physical_devices))
 # tf.config.experimental.set_memory_growth(physical_devices[0], True)
-
-
-# model_test = Sequential({
-#     Conv2D(filters=16, kernel_size=(3,3), padding="same", activation="relu", input=INSERTDOG),
-#     Conv2D(filters=32, kernel_size=(3,3), padding="same",activation="relu")
-#     Conv2D(filters=64, kernel_size=(3,3), padding="same",activation="relu")
-#     Conv2D(filters=128, kernel_size=(3,3), padding="same",activation="relu")
-# })
 
 # Image processing
 
@@ -46,20 +39,9 @@ training_path = "d:/csc2280/dog_breed_project/dog-breed-identification/train"
 test_path = "d:/csc2280/dog_breed_project/dog-breed-identification/test_subset"   #this actually goes the the test_subset folder, which contains some of the dog pictures from test
 validation_path = "d:/csc2280/dog_breed_project/dog-breed-identification/validation"
 
-# for c in random.sample(glob.glob("d:/csc2280/dog_breed_project/dog-breed-identification/test/*"),1000):
-#     shutil.move(c,test_path)
-# for c in random.sample(glob.glob("d:/csc2280/dog_breed_project/dog-breed-identification/test/*"),100):
-#     shutil.move(c,validation_path)
+
 # train_test_split function in keras?
 # validation_split
-
-# actually changed these to the d: drive
-
-# os.chdir("c:/users/vassr/dog-breed-identification")
-# if os.path.isdir("test/test") is False:
-#     os.makedirs("test/test")
-#     os.makedirs("test/valid")
-# os.chdir("../../")  #Not sure what this part is supposed to do
 
 # dictionary containing dog breeds and the codes for the images that correspond to them
 breed_dictionary ={}
@@ -75,19 +57,29 @@ breed_list= list(breed_dictionary.keys())
 
 # Converting images into data, separating into training, test, and validation sets
 # may need to increase the number of pixels being analyzed for each image if accuracy is not high 
-training_data = ImageDataGenerator(preprocessing_function=tf.keras.applications.vgg16.preprocess_input).flow_from_directory(
+
+# Changed preprocessing function to just "preprocessing_input" rather than tf.keras.applications.vgg16.preprocess_input
+training_data = ImageDataGenerator(preprocessing_function=preprocess_input).flow_from_directory(
     directory = training_path,target_size=(224,224), classes=breed_list#make 1 folder for each breed with name of breed being the folder name
 )
 
 # pdb.set_trace()
 
-test_data = ImageDataGenerator(preprocessing_function=tf.keras.applications.vgg16.preprocess_input).flow_from_directory(
+test_data = ImageDataGenerator(preprocessing_function=preprocess_input).flow_from_directory(
     directory = test_path,target_size=(224,224),classes=breed_list)
 
 
-valid_data = ImageDataGenerator(preprocessing_function=tf.keras.applications.vgg16.preprocess_input).flow_from_directory(
+valid_data = ImageDataGenerator(preprocessing_function=preprocess_input).flow_from_directory(
     directory = validation_path,target_size=(224,224),classes=breed_list
 )
+
+# alternate model that could be used in the future
+# model_test = Sequential({
+#     Conv2D(filters=16, kernel_size=(3,3), padding="same", activation="relu", input=training_path),
+#     Conv2D(filters=32, kernel_size=(3,3), padding="same",activation="relu")
+#     Conv2D(filters=64, kernel_size=(3,3), padding="same",activation="relu")
+#     Conv2D(filters=128, kernel_size=(3,3), padding="same",activation="relu")
+# })
 
 # Making the vgg16 model and freezing all layers but last 2
 image_shape = (224, 224, 3)
@@ -95,10 +87,11 @@ VGG16_MODEL = VGG16(input_shape=image_shape, #not sure this part is correct
 include_top= False,
 weights="imagenet"
 )
+
 VGG16_MODEL.trainable=False
 
 pooling_layer = MaxPool2D(pool_size=(2,2),strides=2)
-wgt_reg_layer = Dense(60,kernel_regularizer=regularizers.l2(0.0001),activation="relu")
+wgt_reg_layer = Dense(60,kernel_regularizer=regularizers.l2(0.0001),activation=relu)
 wgt_reg_layer2 = Conv2D(filters=128,kernel_size=(3,3),kernel_regularizer=regularizers.l2(0.0001),activation="relu")
 # 120 because there are 120 dog breeds in list, will have to change if add more breeds
 last_layer = Dense(120,activation="softmax")
@@ -111,9 +104,9 @@ last_layer = Dense(120,activation="softmax")
 #     last_layer
 # ])
 
-model = tf.keras.Sequential([
+model = Sequential([
     VGG16_MODEL,
-    wgt_reg_layer,
+    Dense(64,activation=relu),
  #Might want to investigate BatchNormalization
     Flatten(),
     last_layer
@@ -121,11 +114,13 @@ model = tf.keras.Sequential([
 
 model.summary()
 
-model.compile(optimizer=Adam(learning_rate=0.0001), loss="categorical_crossentropy",metrics=['accuracy'])
-checkpoint = ModelCheckpoint(filepath=os.path.join(ROOT,"dog-breed-identification","vgg16_model_saves2"),verbose=2,monitor="accuracy")
-call_back = [checkpoint]
+#Changed learning rate to 0.001 from 0.0001 to hopefully reduce overfitting
+model.compile(optimizer=Adam(learning_rate=0.001), loss=categorical_crossentropy,metrics=['accuracy'])
+checkpoint = ModelCheckpoint(filepath=os.path.join(ROOT,"dog-breed-identification","vgg16_model_saves"),verbose=2,monitor="accuracy")
+early_stop = EarlyStopping(monitor='val_loss', patience=3,)
+call_back = [checkpoint,early_stop]
 
-model.fit(x=training_data,batch_size=250,validation_data=valid_data, epochs=50, verbose=2,callbacks=call_back)
+model.fit(x=training_data,batch_size=250,validation_data=valid_data, epochs=20, verbose=2,callbacks=call_back)
 
 
 
