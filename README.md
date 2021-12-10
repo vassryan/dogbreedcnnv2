@@ -13,4 +13,5 @@ Steps:
 1) Change the ROOT, training_path, test_path, and validation_path to whatever you desire
 2) Change the path in all of the glob.glob functions to be the appropriate path for your computer
 3) Run the cnn_data_processing program 
-4) 
+4) Enjoy!
+
