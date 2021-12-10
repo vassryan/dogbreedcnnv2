@@ -1,6 +1,5 @@
 import numpy as np
 from sklearn.metrics import confusion_matrix
-import itertools
 import os
 import shutil
 import random
@@ -21,10 +20,11 @@ training_path = "d:/csc2280/dog_breed_project/dog-breed-identification/train"
 test_path = "d:/csc2280/dog_breed_project/dog-breed-identification/test_subset"   #this actually goes the the test_subset folder, which contains some of the dog pictures from test
 validation_path = "d:/csc2280/dog_breed_project/dog-breed-identification/validation"
 
-# for c in random.sample(glob.glob("d:/csc2280/dog_breed_project/dog-breed-identification/test/*"),1000):
-#     shutil.move(c,test_path)
-# for c in random.sample(glob.glob("d:/csc2280/dog_breed_project/dog-breed-identification/test/*"),100):
-#     shutil.move(c,validation_path)
+# Moves 1000 images from the full test set to the test_subset folder
+def create_test_subset():
+    for c in random.sample(glob.glob("d:/csc2280/dog_breed_project/dog-breed-identification/test/*"),1000):
+        shutil.move(c,test_path)
+
 # train_test_split function in keras?
 # validation_split
 
@@ -61,12 +61,18 @@ if os.path.isdir(os.path.join(validation_path,"affenpinscher")) is False:
     for i in range(len(breed_dictionary.keys())):
             os.makedirs(os.path.join(validation_path, breed_list[i]))
 
-# attempting to add correct dog breeds to appropriate breed folder in the training folder
-if os.path.isfile(os.path.join(training_path,"boston_bull","000bec180eb18c7604dcecc8fe0dba07.jpg")) is False:
-    for breed in breed_list:
-        for value in breed_dictionary[breed]:
-            if os.path.isfile(os.path.join(training_path,value+".jpg")):
-                shutil.move(os.path.join(training_path, value+".jpg"), os.path.join(training_path,breed))
+def move_training_to_validation():
+    if os.path.isfile(glob.glob(os.path.join(training_path,"*.jpg"))):
+        for c in random.sample(glob.glob("d:/csc2280/dog_breed_project/dog-breed-identification/train/*.jpg"),100):
+            shutil.move(c,validation_path)
+
+# add correct dog breeds to appropriate breed folders in the training folder
+def move_imgs_to_training_breed_folders():
+    if os.path.isfile(os.path.join(training_path,"boston_bull","000bec180eb18c7604dcecc8fe0dba07.jpg")) is False:
+        for breed in breed_list:
+            for value in breed_dictionary[breed]:
+                if os.path.isfile(os.path.join(training_path,value+".jpg")):
+                    shutil.move(os.path.join(training_path, value+".jpg"), os.path.join(training_path,breed))
 
 
 # moving images into folders for test_subset
@@ -74,33 +80,10 @@ if os.path.isfile(os.path.join(training_path,"boston_bull","000bec180eb18c7604dc
 # need to be careful not to have duplicate images in validation and training, will likely have to first undo movement of files into folders temporarily
 # and then take like 100-200 images from the training set and move them into validation using random.sample(glob.glob...)
 
-# move images from breed folders back to training path so that can take sample of these images and transfer to validation path
-# if os.path.isfile(os.path.join(training_path,"000bec180eb18c7604dcecc8fe0dba07.jpg")) is False:
-#     for breed in breed_list:
-#         for value in breed_dictionary[breed]:
-#             shutil.move(os.path.join(training_path,breed, value+".jpg"), os.path.join(training_path))
+def move_imgs_validation_to_validation_breed_folder(): #moves images in the validation folder to the validation breed folders
+    for breed in breed_list:
+        for value in breed_dictionary[breed]:
+            if os.path.isfile(os.path.join(validation_path,value+".jpg")):
+                shutil.move(os.path.join(validation_path, value+".jpg"), os.path.join(validation_path,breed))
 
 
-# already done, don't need to run again
-# if os.path.isfile(glob.glob(os.path.join(training_path,"*.jpg"))):
-    # for c in random.sample(glob.glob("d:/csc2280/dog_breed_project/dog-breed-identification/train/*.jpg"),100):
-    #     shutil.move(c,validation_path)
-
-# already run so don't need to run again, need to think of if statement that will prevent from rerunning as long as no .jpg in validation folder
-# for breed in breed_list:
-#     for value in breed_dictionary[breed]:
-#         if os.path.isfile(os.path.join(validation_path,value+".jpg")):
-#             shutil.move(os.path.join(validation_path, value+".jpg"), os.path.join(validation_path,breed))
-
-
-
-
-
-
-# confusion matrix
-
-
-
-
-
-# predictions
