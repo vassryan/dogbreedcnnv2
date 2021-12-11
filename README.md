@@ -10,6 +10,8 @@ Within the dog-breed-identification folder, you should have folders named "test"
 
 In the "train" folder, you should place all of the training images from the kaggle dataset. All of the test images from the kaggle dataset should be placed within the "test" folder. 
 
+In the train_subset folder, you need to create a folder called "all_class" and place all images that eventually enter the train_subset folder within the "all_class" folder. This was done to allow for the ImageDataGenerator to properly detect the images since it only searches for subfolders
+
 FILE SETUP
 Ideally, you want your folders to be set up such that within each dataset (training and validation) you have 120 folders (1 for each breed)
 Each breed folder should have the appropriate dog images
