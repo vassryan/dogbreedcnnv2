@@ -53,26 +53,21 @@ if os.path.isdir(os.path.join(training_path,"affenpinscher")) is False:
     for i in range(len(breed_dictionary.keys())):
             os.makedirs(os.path.join(training_path, breed_list[i]))
 
-if os.path.isdir(os.path.join(test_path,"affenpinscher")) is False:
-    for i in range(len(breed_dictionary.keys())):
-            os.makedirs(os.path.join(test_path, breed_list[i]))
-
 if os.path.isdir(os.path.join(validation_path,"affenpinscher")) is False:
     for i in range(len(breed_dictionary.keys())):
             os.makedirs(os.path.join(validation_path, breed_list[i]))
 
 def move_training_to_validation():
     if os.path.isfile(glob.glob(os.path.join(training_path,"*.jpg"))):
-        for c in random.sample(glob.glob("d:/csc2280/dog_breed_project/dog-breed-identification/train/*.jpg"),100):
+        for c in random.sample(glob.glob("d:/csc2280/dog_breed_project/dog-breed-identification/train/*.jpg"),1000):
             shutil.move(c,validation_path)
 
 # add correct dog breeds to appropriate breed folders in the training folder
 def move_imgs_to_training_breed_folders():
-    if os.path.isfile(os.path.join(training_path,"boston_bull","000bec180eb18c7604dcecc8fe0dba07.jpg")) is False:
-        for breed in breed_list:
-            for value in breed_dictionary[breed]:
-                if os.path.isfile(os.path.join(training_path,value+".jpg")):
-                    shutil.move(os.path.join(training_path, value+".jpg"), os.path.join(training_path,breed))
+    for breed in breed_list:
+        for value in breed_dictionary[breed]:
+            if os.path.isfile(os.path.join(training_path,value+".jpg")):
+                shutil.move(os.path.join(training_path, value+".jpg"), os.path.join(training_path,breed))
 
 
 # moving images into folders for test_subset
@@ -87,3 +82,10 @@ def move_imgs_validation_to_validation_breed_folder(): #moves images in the vali
                 shutil.move(os.path.join(validation_path, value+".jpg"), os.path.join(validation_path,breed))
 
 
+move_training_to_validation()
+
+move_imgs_to_training_breed_folders()
+
+move_imgs_validation_to_validation_breed_folder()
+
+create_test_subset()
